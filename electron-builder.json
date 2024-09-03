@@ -1,0 +1,37 @@
+{
+    "productName": "Reader",
+    "appId": "com.example.new",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "package.json",
+      "public/*",
+      "src/*"
+    ],
+    "extraFiles":[
+      "./src/assets"
+    ],
+    "extraMetadata": {
+      "main": "background.js"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "./src/assets/img/favicon.ico"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "./src/assets/img/favicon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowElevation": true,  
+      "allowToChangeInstallationDirectory": true,
+      "installerIcon": "./src/assets/img/favicon.ico",
+      "uninstallerIcon": "./src/assets/img/favicon.ico",
+      "installerHeaderIcon": "./src/assets/img/favicon.ico",
+      "createDesktopShortcut": true,  
+      "createStartMenuShortcut": true,  
+      "shortcutName":"Reader"  
+    }
+  }
