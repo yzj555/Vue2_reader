@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div id="app" :data-app="true">
     <!-- <div class="theme_bg"></div> -->
     <!-- <Header></Header>
     <Content></Content>

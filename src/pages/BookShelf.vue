@@ -1,13 +1,19 @@
 <template>
     <div class="bookShelf" @drop="handleDrop" @dragover="handleDragOver" @dragend="handleDragEnd"
         @dragstart="handleDragStart">
-
-        <div class="bookCover" v-for="item, i in bookList" :key="i" @click="toReader(item)">
+        <!-- <span v-if="Object.keys(bookList).length == 0"
+            style="font-size: 160%; font-weight: 500; color: rgb(99, 99, 99);">拖放文件到此处</span> -->
+        <div class="bookCover" v-for="item, i in bookList" :key="i" @click="toReader(item)"
+            @contextmenu="handleRightClick($event, item)">
             <span class="bookTitle">
                 {{ item.title }}
             </span>
         </div>
-
+        <v-menu :value="showMenu" :position-x="menuPosition.X" :position-y="menuPosition.Y" absolute offset-y>
+            <v-list dense dark >
+                <v-list-item dense @click="delBook"> 删除 </v-list-item>
+            </v-list>
+        </v-menu>
         <v-overlay :value="overlay">
             <span v-if="!lodingStart" style="font-size: 160%; font-weight: 500;">拖放文件到此处</span>
             <v-progress-circular v-if="lodingStart" indeterminate size="64"></v-progress-circular>
@@ -23,6 +29,11 @@ export default {
         return {
             overlay: false,
             lodingStart: false,
+            reLoad: false,
+
+            showMenu: false,
+            menuPosition: { X: 0, Y: 0, },
+            menuBook: {},
 
             bookList: {}, //key：md5码，用于标识是否为同一本小说
 
@@ -31,16 +42,30 @@ export default {
         }
     },
     created() {
-        let that = this
-        this.DBObj.readAll(this.DataKey.bookList, (bookData) => {
-            if (bookData == null || bookData == '') {
-                return
+        this.loadAll()
+    },
+    watch:{
+        reLoad(newVal){
+            if(newVal){
+                this.loadAll()
+                this.reLoad = false
             }
-            that.bookList = bookData
-            // console.log(that.bookList)
-        })
+        }
     },
     methods: {
+        handleRightClick(e, item) {
+            e.preventDefault(); // 阻止默认的右键菜单显示
+            console.log("123")
+            this.showMenu = false
+            this.menuPosition.X = e.clientX
+            this.menuPosition.Y = e.clientY
+            let that = this
+            this.$nextTick(() => {
+                that.menuBook = item
+                that.showMenu = true
+            })
+        },
+
         toReader(item) {
             var data = { id: 1, data: JSON.stringify(item) }
             this.DBObj.updateDB(this.DataKey.curBook, data)
@@ -48,20 +73,34 @@ export default {
             this.$router.push('/bookReader')
         },
 
+        loadAll() {
+            let that = this
+            this.DBObj.readAll(this.DataKey.bookList, (bookData) => {
+                if (bookData == null || bookData == '') {
+                    that.bookList = {}
+                    return
+                }
+                that.bookList = bookData
+                console.log(that.bookList)
+            })
+        },
         handleDrop(e) {
             this.lodingStart = true
             e.preventDefault();
             console.log("拖拽：handleDrop")
+            let that = this
             this.$nextTick(() => {
                 console.log(e)
                 const files = e.dataTransfer.files
                 if (files == undefined || files.length == 0) {
+                    that.lodingStart = false
                     return
                 }
                 const file = files[0]
 
                 if (!file.name.endsWith(".txt")) {
-                    this.$message.warning("不是文本文件（*.txt）")
+                    that.$message.warning("不是文本文件（*.txt）")
+                    that.lodingStart = false
                     return
                 }
 
@@ -83,15 +122,15 @@ export default {
                         reader_utf8.onload = (e2) => {
                             if (e2.target === null) return;
                             const txtString2 = e2.target.result;
-                            this.updateSourceText(txtString2, file.name);
-                            this.overlay = false
-                            this.lodingStart = false
+                            that.updateSourceText(txtString2, file.name);
+                            that.overlay = false
+                            that.lodingStart = false
                         };
 
                     } else {
-                        this.updateSourceText(dataStr, file.name)
-                        this.overlay = false
-                        this.lodingStart = false
+                        that.updateSourceText(dataStr, file.name)
+                        that.overlay = false
+                        that.lodingStart = false
                     }
                 }
 
@@ -130,8 +169,12 @@ export default {
             // 计算MD5
             const md5Value = md5(text);
 
+            // const regExp = new RegExp(
+            //     `(?=${this.currentChapterSplitSymbel})`,
+            //     'g',
+            // );
             const regExp = new RegExp(
-                `(?=${this.currentChapterSplitSymbel})`,
+                `^.?(===)第(.{1,5})[章部集卷节篇回].{0,24}(===)`,
                 'g',
             );
             const chapterList = text.split(regExp);
@@ -166,7 +209,20 @@ export default {
             // this.saveBookData()
             var data = { id: md5Value, data: JSON.stringify(curBook) }
             this.DBObj.updateDB(this.DataKey.bookList, data)
+            this.reLoad = true
         },
+
+        delBook() {
+            console.log(this.menuBook.md5Value)
+            // delete this.bookList[this.menuBook.md5Value]
+            this.DBObj.deleteDB(this.DataKey.bookList, this.menuBook.md5Value)
+            this.reLoad = true
+            // let that = this
+            // this.$nextTick(()=>{
+            //     that.loadAll()
+            // })
+        },
+
         saveBookData() {
             localStorage.setItem(this.DataKey.bookList, JSON.stringify(this.bookList))
         }
@@ -177,6 +233,7 @@ export default {
 .bookShelf {
     width: 95vw;
     height: calc(100vh - 130px);
+    text-align: center;
 }
 
 .bookCover {

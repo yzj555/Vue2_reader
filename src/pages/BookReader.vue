@@ -34,14 +34,14 @@
                 <span>设置</span>
                 <v-icon>mdi-cog-outline</v-icon>
             </v-btn>
-            <v-navigation-drawer class="opBg read-setting" fixed floating bottom v-model="settingFlag"
+            <v-navigation-drawer class="opBg read-setting" fixed floating bottom hide-overlay v-model="settingFlag"
                 :style="`background-color: rgba(${bgColorList[bgColorIndex].baColor}) !important;`">
                 <div style="display: flex;">
                     <v-row justify="space-around">
                         <div class="setting-op-style">背景：</div>
-                        <!-- <div class="setting-bg-color" v-for="item, i in bgColorList" :key="i"
-                            :style="`background-color: rgba(${item.baColor})`" @click="bgColorIndex = i"></div> -->
-                        <v-color-picker class="ma-2" flat hide-canvas hide-inputs style="z-index: 999;"></v-color-picker>
+                        <div class="setting-bg-color" v-for="item, i in bgColorList" :key="i"
+                            :style="`background-color: rgba(${item.baColor})`" @click="bgColorIndex = i"></div>
+                        <!-- <v-color-picker class="ma-2" flat hide-canvas hide-inputs style="z-index: 999;"></v-color-picker> -->
                     </v-row>
                 </div>
             </v-navigation-drawer>

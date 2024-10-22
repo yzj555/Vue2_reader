@@ -1,6 +1,6 @@
 <template>
-    <div>
-        <span class="msg-style">{{ msgList[msgIndex] }}</span>
+    <div style="display: grid; place-items: center;">
+        <div class="msg-style">{{ msgContent }}</div>
         <div class="container">
             <svg class="ghost" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" width="127.433px" height="132.743px"
@@ -60,7 +60,8 @@ export default {
                 '心有灵犀一点通',
             ],
             msgIndex: 0,
-            msgContent: '日照香炉生紫烟',
+            contentIndex: 0,
+            msgContent: '',
         }
     },
     mounted() {
@@ -78,50 +79,45 @@ export default {
             eye1.style.transform = `translateX(${x}px) translateY(${y}px)`;
             eye2.style.transform = `translateX(${x}px) translateY(${y}px)`;
         });
-        // let that = this
-        // setInterval(function () {
-        //     if (that.msgIndex + 1 == that.msgList.length) {
-        //         that.msgIndex = 0
-        //     } else {
-        //         that.msgIndex += 1
-        //     }
-        // }, 7000);
+        this.typeWriter()
+    },
+    methods: {
+        typeWriter() {
+            if (this.contentIndex < this.msgList[this.msgIndex].length) {
+                this.msgContent += this.msgList[this.msgIndex][this.contentIndex];
+                this.contentIndex++;
+            } else {
+                this.msgContent = ""
+                this.contentIndex = 0
+                if (this.msgIndex + 1 == this.msgList.length) {
+                    this.msgIndex = 0
+                } else {
+                    this.msgIndex += 1
+                }
+            }
+            setTimeout(this.typeWriter, 500); // 调整这里的时间间隔可以控制打字速度
+        }
     },
 }
 </script>
 <style>
 .msg-style {
-    /* position: absolute; */
-    /* top: 50%; */
-    /* left: 50%; */
-    width: 0;
+    width: 100%;
     font-size: 150%;
     font-weight: bold;
     color: #000;
     white-space: nowrap;
     border-right: 2px solid rgba(0, 0, 0, 0.4);
-    animation: texteff51 4s steps(7, start) infinite, lineeff51 1s steps(2, start) infinite;
-    /* animation: texteff51 4s steps(7, start) infinite; */
+    /* animation: texteff51 4s steps(7, start) infinite, lineeff51 1s steps(2, start) infinite; */
+    animation: lineeff51 1s steps(2, start) infinite; /** 右边框动画,模拟光标效果 */
     overflow: hidden;
     top: -100px;
     position: relative;
     display: flex;
-    float: left;
-    max-width: 170px;
-}
-
-@keyframes texteff51 {
-    0% {
-        width: 0px;
-    }
-
-    60% {
-        width: 170px;
-    }
-
-    100% {
-        width: 170px;
-    }
+    flex-direction: column;
+    justify-content: center;
+    /* margin: 0 auto; */
+    left: 50%;
 }
 
 @keyframes lineeff51 {
@@ -135,7 +131,7 @@ export default {
 }
 
 .container {
-    width: 100px !important;
+    width: 150px !important;
     text-align: left;
     position: absolute;
     top: 50%;
