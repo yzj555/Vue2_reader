@@ -117,7 +117,7 @@ export default {
     flex-direction: column;
     justify-content: center;
     /* margin: 0 auto; */
-    left: 50%;
+    left: 30%;
 }
 
 @keyframes lineeff51 {

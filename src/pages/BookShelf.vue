@@ -1,5 +1,5 @@
 <template>
-    <div class="bookShelf" @drop="handleDrop" @dragover="handleDragOver" @dragend="handleDragEnd"
+    <div class="bookShelf" @drop="handleDrop($event, true)" @dragover="handleDragOver" @dragend="handleDragEnd"
         @dragstart="handleDragStart">
         <!-- <span v-if="Object.keys(bookList).length == 0"
             style="font-size: 160%; font-weight: 500; color: rgb(99, 99, 99);">拖放文件到此处</span> -->
@@ -9,8 +9,16 @@
                 {{ item.title }}
             </span>
         </div>
+        <div class="bookAdd">
+            <!-- <span>
+                +
+            </span> -->
+            <v-file-input hide-input prepend-icon="mdi-plus" @change="handleDrop($event, false)">
+
+            </v-file-input>
+        </div>
         <v-menu :value="showMenu" :position-x="menuPosition.X" :position-y="menuPosition.Y" absolute offset-y>
-            <v-list dense dark >
+            <v-list dense dark>
                 <v-list-item dense @click="delBook"> 删除 </v-list-item>
             </v-list>
         </v-menu>
@@ -44,9 +52,9 @@ export default {
     created() {
         this.loadAll()
     },
-    watch:{
-        reLoad(newVal){
-            if(newVal){
+    watch: {
+        reLoad(newVal) {
+            if (newVal) {
                 this.loadAll()
                 this.reLoad = false
             }
@@ -84,19 +92,26 @@ export default {
                 console.log(that.bookList)
             })
         },
-        handleDrop(e) {
+        handleDrop(e, isDrop) {
             this.lodingStart = true
-            e.preventDefault();
-            console.log("拖拽：handleDrop")
+            console.log("拖拽：handleDrop:", e)
+            if (isDrop) {
+                e.preventDefault();
+            }
             let that = this
             this.$nextTick(() => {
                 console.log(e)
-                const files = e.dataTransfer.files
-                if (files == undefined || files.length == 0) {
-                    that.lodingStart = false
-                    return
+                var file
+                if (isDrop) {
+                    const files = e.dataTransfer.files
+                    if (files == undefined || files.length == 0) {
+                        that.lodingStart = false
+                        return
+                    }
+                    file = files[0]
+                }else{
+                    file = e
                 }
-                const file = files[0]
 
                 if (!file.name.endsWith(".txt")) {
                     that.$message.warning("不是文本文件（*.txt）")
@@ -169,14 +184,14 @@ export default {
             // 计算MD5
             const md5Value = md5(text);
 
-            // const regExp = new RegExp(
-            //     `(?=${this.currentChapterSplitSymbel})`,
-            //     'g',
-            // );
             const regExp = new RegExp(
-                `^.?(===)第(.{1,5})[章部集卷节篇回].{0,24}(===)`,
+                `(?=${this.currentChapterSplitSymbel})`,
                 'g',
             );
+            // const regExp = new RegExp(
+            //     `^.?(===)第(.{1,5})[章部集卷节篇回].{0,24}(===)`,
+            //     'g',
+            // );
             const chapterList = text.split(regExp);
             if (!chapterList) return;
             var curBook = {
@@ -234,6 +249,22 @@ export default {
     width: 95vw;
     height: calc(100vh - 130px);
     text-align: center;
+}
+
+.bookAdd {
+    float: left;
+    width: 70px;
+    height: 100px;
+    margin: 10px;
+    display: flex;
+    /* border: 1px black solid; */
+    /* align-items: center; */
+    color: aliceblue;
+    padding-left: 25px;
+    /* padding-top: 20px !important; */
+    font-size: 200%;
+    background-color: rgba(92, 86, 78, 0.3);
+    box-shadow: 5px 5px 10px 0px rgba(0, 0, 0, 0.6) !important;
 }
 
 .bookCover {

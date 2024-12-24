@@ -15,7 +15,7 @@
 </template>
 <script>
 // import { getCurrentWindow } from '@electron/remote'
-import { ipcRenderer } from 'electron'
+// import { ipcRenderer } from 'electron'
 export default {
     name: "Header",
     props: {
@@ -29,11 +29,11 @@ export default {
             // console.log(getCurrentWindow())
             // getCurrentWindow().minimize()
             //发送最小化命令
-            ipcRenderer.send('window-min');
+            // ipcRenderer.send('window-min');
         },
         closeApp() {
             // getCurrentWindow().close()
-            ipcRenderer.send('window-quit');
+            // ipcRenderer.send('window-quit');
         },
     },
 }
